@@ -1,0 +1,424 @@
+<title>คำนวณพับวงแหวนเมทัลชีท</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef1ef;
+    --surface:#ffffff;
+    --surface-2:#f6f7f5;
+    --ink:#182430;
+    --muted:#58697a;
+    --accent:#c8461b;
+    --accent-soft:#f4ded0;
+    --warn:#8a5a00;
+    --warn-soft:#f6e6bf;
+    --grid-line:rgba(24,36,48,.09);
+    --border:rgba(24,36,48,.18);
+    --border-strong:rgba(24,36,48,.32);
+    --field-bg:#ffffff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d2038; --surface:#123152; --surface-2:#0f2947; --ink:#eaf2f6;
+      --muted:#93aec2; --accent:#ff8a4c; --accent-soft:rgba(255,138,76,.16);
+      --warn:#ffcf5c; --warn-soft:rgba(255,207,92,.14);
+      --grid-line:rgba(234,242,246,.10); --border:rgba(234,242,246,.20);
+      --border-strong:rgba(234,242,246,.38); --field-bg:#0f2947;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d2038; --surface:#123152; --surface-2:#0f2947; --ink:#eaf2f6;
+    --muted:#93aec2; --accent:#ff8a4c; --accent-soft:rgba(255,138,76,.16);
+    --warn:#ffcf5c; --warn-soft:rgba(255,207,92,.14);
+    --grid-line:rgba(234,242,246,.10); --border:rgba(234,242,246,.20);
+    --border-strong:rgba(234,242,246,.38); --field-bg:#0f2947;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg);
+    background-image:linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;
+    line-height:1.6; padding:clamp(16px,4vw,48px);
+  }
+  h1,h2,h3{ font-family:'Kanit',sans-serif; text-wrap:balance; margin:0; }
+  .mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+
+  .sheet{ max-width:1080px; margin:0 auto; background:var(--surface);
+    border:1.5px solid var(--border-strong); border-radius:6px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 32px -18px rgba(0,0,0,.28);
+    overflow:hidden; }
+
+  .titleblock{ padding:26px clamp(20px,4vw,40px) 22px; border-bottom:1.5px solid var(--border-strong); background:var(--surface-2); }
+  .titleblock .eyebrow{ display:block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:8px; }
+  .titleblock h1{ font-size:clamp(1.4rem,3vw,2rem); font-weight:800; }
+  .titleblock .sub{ color:var(--muted); margin-top:6px; font-size:.95rem; max-width:62ch; }
+
+  .body{ padding:clamp(18px,4vw,36px); display:flex; flex-direction:column; gap:28px; }
+
+  /* controls */
+  .controls{ display:flex; flex-wrap:wrap; gap:16px 22px; align-items:end;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:18px 20px; }
+  .field{ display:flex; flex-direction:column; gap:6px; min-width:150px; }
+  .field label{ font-size:.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .field .input-row{ display:flex; align-items:center; border:1px solid var(--border-strong); border-radius:5px; background:var(--field-bg); overflow:hidden; }
+  .field input{ border:none; background:transparent; color:var(--ink); font:inherit; font-family:'IBM Plex Mono',monospace; font-size:1rem; padding:9px 10px; width:100%; min-width:0; }
+  .field input:focus{ outline:2px solid var(--accent); outline-offset:-1px; }
+  .field .unit{ padding:0 10px; color:var(--muted); font-size:.8rem; font-family:'IBM Plex Mono',monospace; border-left:1px solid var(--border); white-space:nowrap; }
+  .field.optional label::after{ content:" (ไม่บังคับ)"; text-transform:none; letter-spacing:0; opacity:.7; }
+  .spacer{ flex:1 1 auto; }
+  .btn-reset{ font-family:'IBM Plex Sans Thai',sans-serif; font-size:.85rem; font-weight:500; color:var(--muted);
+    background:transparent; border:1px solid var(--border-strong); border-radius:5px; padding:9px 16px; cursor:pointer; }
+  .btn-reset:hover{ color:var(--ink); border-color:var(--ink); }
+
+  .alert{ display:none; align-items:flex-start; gap:10px; border-radius:6px; padding:13px 16px; font-size:.88rem; border:1px solid; }
+  .alert.show{ display:flex; }
+  .alert.warn{ background:var(--warn-soft); border-color:var(--warn); color:var(--warn); }
+  .alert.error{ background:var(--warn-soft); border-color:var(--warn); color:var(--warn); }
+  .alert strong{ font-weight:700; }
+
+  .layout-main{ display:grid; grid-template-columns:1.55fr 1fr; gap:24px; align-items:start; }
+  @media (max-width:760px){ .layout-main{ grid-template-columns:1fr; } }
+
+  .panel{ border:1px solid var(--border); border-radius:6px; background:var(--surface-2); padding:18px 18px 14px; }
+  .panel h2{ font-size:.92rem; font-weight:700; margin-bottom:4px; }
+  .panel .panel-sub{ color:var(--muted); font-size:.78rem; margin-bottom:10px; }
+
+  svg text{ font-family:'IBM Plex Mono',monospace; fill:var(--ink); }
+  .ring-outline{ fill:none; stroke:var(--ink); stroke-width:3; }
+  .centerline{ stroke:var(--muted); stroke-width:1; stroke-dasharray:10 4 2 4; opacity:.6; }
+  .tick{ stroke:var(--accent); stroke-width:1.4; }
+  .dim-line{ stroke:var(--ink); stroke-width:1.4; }
+  .ext-line{ stroke:var(--muted); stroke-width:1; stroke-dasharray:3 3; }
+  .dim-label{ font-size:20px; font-weight:600; text-anchor:middle; }
+  .detail-marker{ fill:none; stroke:var(--accent); stroke-width:1.6; stroke-dasharray:5 4; }
+  .detail-letter-bg{ fill:var(--accent); }
+  .detail-letter{ fill:var(--surface); font-size:15px; font-weight:600; text-anchor:middle; dominant-baseline:central; }
+  .angle-arc{ fill:none; stroke:var(--accent); stroke-width:1.6; }
+  .radius-line{ stroke:var(--ink); stroke-width:1.4; }
+  .chord-line{ stroke:var(--accent); stroke-width:2.2; }
+  .small-label{ font-size:13px; fill:var(--muted); text-anchor:middle; }
+  .accent-label{ font-size:13px; fill:var(--accent); font-weight:600; text-anchor:middle; }
+  .note-line{ text-align:center; color:var(--muted); font-size:.76rem; margin-top:6px; }
+
+  table.spec{ width:100%; border-collapse:collapse; font-size:.92rem; }
+  table.spec caption{ text-align:left; font-family:'Kanit',sans-serif; font-weight:700; font-size:1rem; margin-bottom:12px; }
+  table.spec th{ text-align:left; color:var(--muted); font-weight:500; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; padding-bottom:8px; border-bottom:1px solid var(--border-strong); }
+  table.spec td{ padding:11px 10px 11px 0; border-bottom:1px solid var(--border); }
+  table.spec td.val{ text-align:right; padding-right:4px; font-weight:600; }
+  table.spec tr:last-child td{ border-bottom:none; }
+  table.spec tr.highlight td{ color:var(--accent); }
+  .wrap-x{ overflow-x:auto; }
+
+  .formula-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .formula-chip{ font-family:'IBM Plex Mono',monospace; font-size:.78rem; background:var(--accent-soft); color:var(--accent); border-radius:4px; padding:6px 10px; white-space:nowrap; }
+
+  .footnote{ border-top:1.5px solid var(--border-strong); padding:18px clamp(20px,4vw,40px) 24px; background:var(--surface-2); color:var(--muted); font-size:.86rem; }
+</style>
+
+<div class="sheet">
+
+  <div class="titleblock">
+    <span class="eyebrow">เครื่องคำนวณ · งานพับเหล็กด้วยเครื่องย้ำ</span>
+    <h1>คำนวณพับเมทัลชีทเป็นวงแหวน</h1>
+    <div class="sub">ใส่เส้นผ่านศูนย์กลางที่ต้องการและมุมงอของเครื่องย้ำต่อการกดหนึ่งครั้ง ระบบจะคำนวณจำนวนครั้ง ระยะห่างจุดย้ำ และความยาวแผ่นให้ทันที</div>
+  </div>
+
+  <div class="body">
+
+    <div class="controls">
+      <div class="field">
+        <label for="dia">เส้นผ่านศูนย์กลางวง</label>
+        <div class="input-row"><input id="dia" type="number" value="3" step="0.01" min="0.05"><span class="unit">เมตร</span></div>
+      </div>
+      <div class="field">
+        <label for="theta">มุมงอต่อการย้ำ 1 ครั้ง</label>
+        <div class="input-row"><input id="theta" type="number" value="6" step="0.1" min="0.1" max="120"><span class="unit">องศา</span></div>
+      </div>
+      <div class="field optional">
+        <label for="head">ความกว้างหัวเครื่องย้ำ</label>
+        <div class="input-row"><input id="head" type="number" placeholder="—" step="0.1" min="0"><span class="unit">ซม.</span></div>
+      </div>
+      <div class="field optional">
+        <label for="allow">เผื่อความยาวปลายแผ่น</label>
+        <div class="input-row"><input id="allow" type="number" value="5" step="0.5" min="0"><span class="unit">ซม.</span></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn-reset" id="resetBtn" type="button">ค่าเริ่มต้น</button>
+    </div>
+
+    <div id="alertBox" class="alert warn">
+      <span id="alertText"></span>
+    </div>
+
+    <div class="layout-main">
+      <div class="panel">
+        <h2>ผังจุดย้ำรอบวง</h2>
+        <div class="panel-sub" id="ringSub">แสดงจุดย้ำครบทุกจุด — วงกลมปิดสนิทเมื่อครบรอบ 360° (แผนภาพไม่ตามมาตราส่วนจริง)</div>
+        <svg viewBox="0 0 640 660" role="img" aria-label="แผนผังวงกลมแสดงจุดย้ำรอบเส้นผ่านศูนย์กลางที่กำหนด">
+          <line class="centerline" x1="320" y1="70" x2="320" y2="570"/>
+          <line class="centerline" x1="70" y1="320" x2="570" y2="320"/>
+          <circle class="ring-outline" cx="320" cy="320" r="230"/>
+          <g id="ticks"></g>
+          <circle id="markerCircle" class="detail-marker" cx="332" cy="92" r="34"/>
+          <circle class="detail-letter-bg" id="markerBg" cx="332" cy="52" r="12"/>
+          <text class="detail-letter" id="markerText" x="332" y="53">A</text>
+          <line class="ext-line" x1="90" y1="320" x2="90" y2="592"/>
+          <line class="ext-line" x1="550" y1="320" x2="550" y2="592"/>
+          <line class="dim-line" x1="90" y1="582" x2="550" y2="582" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text class="dim-label" id="diaLabel" x="320" y="614">⌀ 3.000 ม.</text>
+          <defs>
+            <marker id="arrowEnd" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--ink)"/></marker>
+            <marker id="arrowStart" markerWidth="10" markerHeight="10" refX="2" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 Z" fill="var(--ink)"/></marker>
+          </defs>
+        </svg>
+        <div class="note-line" id="ringNote">เส้นรอบวง C = π·D ≈ 9.4248 ม.</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="panel">
+          <h2>DETAIL A — มุมย้ำหนึ่งจุด</h2>
+          <div class="panel-sub">ขยาย (ไม่ตามมาตราส่วน)</div>
+          <svg viewBox="0 0 300 250" role="img" aria-label="ภาพขยายมุมระหว่างจุดย้ำสองจุดและระยะคอร์ด">
+            <line class="radius-line" id="rl1" x1="150" y1="230" x2="141.1" y2="60.2"/>
+            <line class="radius-line" id="rl2" x1="150" y1="230" x2="158.9" y2="60.2"/>
+            <path class="angle-arc" id="angleArc" d="M 145.5 145.1 A 85 85 0 0 1 154.5 145.1"/>
+            <text class="accent-label" id="angleLabel" x="150" y="130">6°</text>
+            <line class="chord-line" id="chordLine" x1="141.1" y1="60.2" x2="158.9" y2="60.2"/>
+            <line class="ext-line" id="cext1" x1="141.1" y1="60.2" x2="141.1" y2="38"/>
+            <line class="ext-line" id="cext2" x1="158.9" y1="60.2" x2="158.9" y2="38"/>
+            <line class="dim-line" id="cdim" x1="141.1" y1="44" x2="158.9" y2="44" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+            <text class="small-label" id="chordLabel" x="150" y="28">15.70 ซม.</text>
+            <text class="small-label" x="150" y="246">จุดศูนย์กลางวงกลม</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap-x">
+      <table class="spec">
+        <caption>ตารางคำนวณ</caption>
+        <thead><tr><th>รายการ</th><th style="text-align:right">ค่า</th></tr></thead>
+        <tbody class="mono">
+          <tr><td>เส้นผ่านศูนย์กลาง (D)</td><td class="val" id="outD">3.000 ม.</td></tr>
+          <tr><td>รัศมี (r = D/2)</td><td class="val" id="outR">1.500 ม.</td></tr>
+          <tr><td>เส้นรอบวง (C = π·D)</td><td class="val" id="outC">9.4248 ม.</td></tr>
+          <tr><td>มุมที่ใส่ (θ ต้องการ)</td><td class="val" id="outThetaIn">6.000°</td></tr>
+          <tr><td>จำนวนครั้งที่ต้องย้ำ (n)</td><td class="val" id="outN">60 ครั้ง</td></tr>
+          <tr><td>มุมจริงต่อจุด (ปรับให้ปิดวงพอดี)</td><td class="val" id="outThetaAct">6.000°</td></tr>
+          <tr><td>ระยะห่างจุดย้ำ (คอร์ด = 2r·sin(θ/2))</td><td class="val" id="outChord">15.70 ซม.</td></tr>
+          <tr><td>ความยาวแผ่นขั้นต่ำ (n × คอร์ด)</td><td class="val" id="outMin">9.420 ม.</td></tr>
+          <tr class="highlight"><td>ความยาวแผ่นแนะนำให้ตัด</td><td class="val" id="outRec">9.470 ม.</td></tr>
+        </tbody>
+      </table>
+      <div class="formula-row">
+        <span class="formula-chip">C = π · D</span>
+        <span class="formula-chip">n = round(360° ÷ θ)</span>
+        <span class="formula-chip">คอร์ด = 2r · sin(θจริง/2)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <strong>ข้อควรระวังหน้างาน:</strong> วัดและทำเครื่องหมายจุดย้ำทุกจุดด้วยตลับเมตรก่อนเริ่มกดจริง เพื่อไม่ให้ระยะสะสมคลาดเคลื่อนจนวงเบี้ยว
+    ระบบปรับมุมต่อจุดให้ลงตัวอัตโนมัติ (360° หารด้วยจำนวนครั้งเต็มจำนวน) เพื่อให้วงปิดสนิทพอดี
+  </div>
+</div>
+
+<script>
+(function(){
+  var ns = 'http://www.w3.org/2000/svg';
+  var els = {
+    dia: document.getElementById('dia'),
+    theta: document.getElementById('theta'),
+    head: document.getElementById('head'),
+    allow: document.getElementById('allow'),
+    resetBtn: document.getElementById('resetBtn'),
+    alertBox: document.getElementById('alertBox'),
+    alertText: document.getElementById('alertText'),
+    ticks: document.getElementById('ticks'),
+    markerCircle: document.getElementById('markerCircle'),
+    markerBg: document.getElementById('markerBg'),
+    markerText: document.getElementById('markerText'),
+    diaLabel: document.getElementById('diaLabel'),
+    ringNote: document.getElementById('ringNote'),
+    ringSub: document.getElementById('ringSub'),
+    rl1: document.getElementById('rl1'),
+    rl2: document.getElementById('rl2'),
+    angleArc: document.getElementById('angleArc'),
+    angleLabel: document.getElementById('angleLabel'),
+    chordLine: document.getElementById('chordLine'),
+    cext1: document.getElementById('cext1'),
+    cext2: document.getElementById('cext2'),
+    cdim: document.getElementById('cdim'),
+    chordLabel: document.getElementById('chordLabel'),
+    outD: document.getElementById('outD'),
+    outR: document.getElementById('outR'),
+    outC: document.getElementById('outC'),
+    outThetaIn: document.getElementById('outThetaIn'),
+    outN: document.getElementById('outN'),
+    outThetaAct: document.getElementById('outThetaAct'),
+    outChord: document.getElementById('outChord'),
+    outMin: document.getElementById('outMin'),
+    outRec: document.getElementById('outRec')
+  };
+
+  var DEFAULTS = { dia: '3', theta: '6', head: '', allow: '5' };
+
+  function loadSaved(){
+    try{
+      var raw = localStorage.getItem('metalRingCalc');
+      if(!raw) return;
+      var v = JSON.parse(raw);
+      if(v.dia) els.dia.value = v.dia;
+      if(v.theta) els.theta.value = v.theta;
+      if(v.head !== undefined) els.head.value = v.head;
+      if(v.allow !== undefined) els.allow.value = v.allow;
+    }catch(e){}
+  }
+  function saveState(){
+    try{
+      localStorage.setItem('metalRingCalc', JSON.stringify({
+        dia: els.dia.value, theta: els.theta.value, head: els.head.value, allow: els.allow.value
+      }));
+    }catch(e){}
+  }
+
+  function fmt(n, d){ return n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d}); }
+
+  function polarMain(angleDeg, radius){
+    var a = angleDeg * Math.PI / 180;
+    return { x: 320 + radius * Math.sin(a), y: 320 - radius * Math.cos(a) };
+  }
+
+  function drawTicks(n){
+    while(els.ticks.firstChild) els.ticks.removeChild(els.ticks.firstChild);
+    var drawCount = n, step = 1;
+    if(n > 120){ step = Math.ceil(n/90); }
+    for(var i=0;i<n;i+=step){
+      var angle = i * (360/n);
+      var p1 = polarMain(angle, 230);
+      var p2 = polarMain(angle, 243);
+      var line = document.createElementNS(ns,'line');
+      line.setAttribute('x1', p1.x.toFixed(2));
+      line.setAttribute('y1', p1.y.toFixed(2));
+      line.setAttribute('x2', p2.x.toFixed(2));
+      line.setAttribute('y2', p2.y.toFixed(2));
+      line.setAttribute('class','tick');
+      els.ticks.appendChild(line);
+    }
+  }
+
+  function updateMarker(thetaActual){
+    var chordScreen = 2*230*Math.sin((thetaActual/2)*Math.PI/180);
+    var r = Math.min(140, Math.max(20, chordScreen/2 + 16));
+    var mid = polarMain(thetaActual/2, 230);
+    els.markerCircle.setAttribute('cx', mid.x.toFixed(2));
+    els.markerCircle.setAttribute('cy', mid.y.toFixed(2));
+    els.markerCircle.setAttribute('r', r.toFixed(2));
+    var labelY = Math.max(20, mid.y - r - 18);
+    els.markerBg.setAttribute('cx', mid.x.toFixed(2));
+    els.markerBg.setAttribute('cy', labelY.toFixed(2));
+    els.markerText.setAttribute('x', mid.x.toFixed(2));
+    els.markerText.setAttribute('y', (labelY+1).toFixed(2));
+  }
+
+  function updateDetail(thetaActual, chordM){
+    var half = thetaActual/2, rad = half*Math.PI/180;
+    var cx=150, cy=230, R=170, arcR=85;
+    var x1 = cx - R*Math.sin(rad), y1 = cy - R*Math.cos(rad);
+    var x2 = cx + R*Math.sin(rad), y2 = cy - R*Math.cos(rad);
+    els.rl1.setAttribute('x2', x1.toFixed(1)); els.rl1.setAttribute('y2', y1.toFixed(1));
+    els.rl2.setAttribute('x2', x2.toFixed(1)); els.rl2.setAttribute('y2', y2.toFixed(1));
+    var ax1 = cx - arcR*Math.sin(rad), ay1 = cy - arcR*Math.cos(rad);
+    var ax2 = cx + arcR*Math.sin(rad), ay2 = cy - arcR*Math.cos(rad);
+    els.angleArc.setAttribute('d', 'M '+ax1.toFixed(1)+' '+ay1.toFixed(1)+' A '+arcR+' '+arcR+' 0 0 1 '+ax2.toFixed(1)+' '+ay2.toFixed(1));
+    els.angleLabel.setAttribute('x', cx); els.angleLabel.setAttribute('y', (cy-arcR+15).toFixed(1));
+    els.angleLabel.textContent = fmt(thetaActual,2)+'°';
+    els.chordLine.setAttribute('x1',x1.toFixed(1)); els.chordLine.setAttribute('y1',y1.toFixed(1));
+    els.chordLine.setAttribute('x2',x2.toFixed(1)); els.chordLine.setAttribute('y2',y2.toFixed(1));
+    var extTop = Math.min(y1,y2) - 22;
+    els.cext1.setAttribute('x1',x1.toFixed(1)); els.cext1.setAttribute('y1',y1.toFixed(1)); els.cext1.setAttribute('x2',x1.toFixed(1)); els.cext1.setAttribute('y2',extTop.toFixed(1));
+    els.cext2.setAttribute('x1',x2.toFixed(1)); els.cext2.setAttribute('y1',y2.toFixed(1)); els.cext2.setAttribute('x2',x2.toFixed(1)); els.cext2.setAttribute('y2',extTop.toFixed(1));
+    var dimY = extTop + 6;
+    els.cdim.setAttribute('x1',x1.toFixed(1)); els.cdim.setAttribute('y1',dimY.toFixed(1)); els.cdim.setAttribute('x2',x2.toFixed(1)); els.cdim.setAttribute('y2',dimY.toFixed(1));
+    els.chordLabel.setAttribute('x', ((x1+x2)/2).toFixed(1));
+    els.chordLabel.setAttribute('y', (dimY-10).toFixed(1));
+    els.chordLabel.textContent = fmt(chordM*100,2)+' ซม.';
+  }
+
+  function showAlert(msg){
+    els.alertText.innerHTML = msg;
+    els.alertBox.classList.add('show');
+  }
+  function hideAlert(){ els.alertBox.classList.remove('show'); }
+
+  function compute(){
+    hideAlert();
+    var D = parseFloat(els.dia.value);
+    var thetaIn = parseFloat(els.theta.value);
+    var head = parseFloat(els.head.value);
+    var allowCm = parseFloat(els.allow.value);
+    if(!(D>0)){ showAlert('<strong>กรุณาใส่เส้นผ่านศูนย์กลางที่มากกว่า 0</strong>'); return; }
+    if(!(thetaIn>0)){ showAlert('<strong>กรุณาใส่มุมงอที่มากกว่า 0 องศา</strong>'); return; }
+    var effTheta = thetaIn;
+    var warnBig = false;
+    if(effTheta > 120){ effTheta = 120; warnBig = true; }
+
+    var r = D/2;
+    var C = Math.PI * D;
+    var n = Math.max(3, Math.round(360/effTheta));
+    var thetaActual = 360/n;
+    var chord = 2 * r * Math.sin((thetaActual/2) * Math.PI/180);
+    var totalMin = n * chord;
+    var allowM = (isNaN(allowCm) ? 0 : allowCm) / 100;
+    var recommended = totalMin + allowM;
+
+    els.outD.textContent = fmt(D,3)+' ม.';
+    els.outR.textContent = fmt(r,3)+' ม.';
+    els.outC.textContent = fmt(C,4)+' ม.';
+    els.outThetaIn.textContent = fmt(thetaIn,3)+'°';
+    els.outN.textContent = n+' ครั้ง';
+    els.outThetaAct.textContent = fmt(thetaActual,3)+'°';
+    els.outChord.textContent = fmt(chord*100,2)+' ซม.';
+    els.outMin.textContent = fmt(totalMin,3)+' ม.';
+    els.outRec.textContent = fmt(recommended,3)+' ม.';
+    els.diaLabel.textContent = '⌀ '+fmt(D,3)+' ม.';
+    els.ringNote.textContent = 'เส้นรอบวง C = π·D ≈ '+fmt(C,4)+' ม. · '+n+' จุด ห่างกันจุดละ '+fmt(thetaActual,2)+'°';
+    els.ringSub.textContent = n > 120
+      ? 'จุดย้ำมี '+n+' จุด (แสดงบางส่วนเพื่อความชัดเจน) — วงกลมปิดสนิทเมื่อครบรอบ 360°'
+      : 'แสดงจุดย้ำครบทั้ง '+n+' จุด — วงกลมปิดสนิทเมื่อครบรอบ 360° (แผนภาพไม่ตามมาตราส่วนจริง)';
+
+    drawTicks(n);
+    updateMarker(thetaActual);
+    updateDetail(thetaActual, chord);
+
+    var msgs = [];
+    if(warnBig){ msgs.push('มุมที่ใส่เกิน 120° ปรับเป็น 120° ให้อัตโนมัติ (อย่างน้อยต้องมี 3 จุดจึงจะปิดวงได้)'); }
+    if(Math.abs(thetaActual - thetaIn) > 0.01 && !warnBig){
+      msgs.push('360° ÷ '+fmt(thetaIn,2)+'° หารไม่ลงตัว ระบบปรับเป็น '+n+' ครั้ง (มุมจริงต่อจุด = '+fmt(thetaActual,3)+'°) เพื่อให้วงปิดสนิทพอดี');
+    }
+    if(!isNaN(head) && head>0 && chord*100 < head){
+      msgs.push('<strong>คำเตือน:</strong> ระยะห่างจุดย้ำ ('+fmt(chord*100,2)+' ซม.) แคบกว่าความกว้างหัวเครื่อง ('+fmt(head,1)+' ซม.) จุดย้ำจะซ้อนทับกัน — ลดขนาดวงหรือเพิ่มมุมต่อครั้ง');
+    }
+    if(n > 400){ msgs.push('จำนวนครั้งที่คำนวณได้ ('+n+' ครั้ง) สูงมาก ตรวจสอบว่าใส่มุมถูกต้องหรือไม่'); }
+
+    if(msgs.length){ showAlert(msgs.join('<br>')); }
+    saveState();
+  }
+
+  els.dia.addEventListener('input', compute);
+  els.theta.addEventListener('input', compute);
+  els.head.addEventListener('input', compute);
+  els.allow.addEventListener('input', compute);
+  els.resetBtn.addEventListener('click', function(){
+    els.dia.value = DEFAULTS.dia; els.theta.value = DEFAULTS.theta;
+    els.head.value = DEFAULTS.head; els.allow.value = DEFAULTS.allow;
+    compute();
+  });
+
+  loadSaved();
+  compute();
+})();
+</script>

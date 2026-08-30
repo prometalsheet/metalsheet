@@ -1,0 +1,337 @@
+<title>วงแหวนเมทัลชีท 3 เมตร</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#eef1ef;
+    --surface:#ffffff;
+    --surface-2:#f6f7f5;
+    --ink:#182430;
+    --muted:#58697a;
+    --accent:#c8461b;
+    --accent-soft:#f4ded0;
+    --grid-line:rgba(24,36,48,.09);
+    --border:rgba(24,36,48,.18);
+    --border-strong:rgba(24,36,48,.32);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d2038;
+      --surface:#123152;
+      --surface-2:#0f2947;
+      --ink:#eaf2f6;
+      --muted:#93aec2;
+      --accent:#ff8a4c;
+      --accent-soft:rgba(255,138,76,.16);
+      --grid-line:rgba(234,242,246,.10);
+      --border:rgba(234,242,246,.20);
+      --border-strong:rgba(234,242,246,.38);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d2038;
+    --surface:#123152;
+    --surface-2:#0f2947;
+    --ink:#eaf2f6;
+    --muted:#93aec2;
+    --accent:#ff8a4c;
+    --accent-soft:rgba(255,138,76,.16);
+    --grid-line:rgba(234,242,246,.10);
+    --border:rgba(234,242,246,.20);
+    --border-strong:rgba(234,242,246,.38);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans Thai','IBM Plex Sans',sans-serif;
+    line-height:1.6;
+    padding:clamp(16px,4vw,48px);
+  }
+  h1,h2,h3{ font-family:'Kanit',sans-serif; text-wrap:balance; margin:0; }
+  .mono{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+
+  .sheet{
+    max-width:1040px;
+    margin:0 auto;
+    background:var(--surface);
+    border:1.5px solid var(--border-strong);
+    border-radius:6px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 32px -18px rgba(0,0,0,.28);
+    overflow:hidden;
+  }
+
+  /* ---- title block ---- */
+  .titleblock{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px 32px;
+    align-items:flex-end;
+    justify-content:space-between;
+    padding:28px clamp(20px,4vw,40px) 22px;
+    border-bottom:1.5px solid var(--border-strong);
+    background:var(--surface-2);
+  }
+  .titleblock .heading .eyebrow{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:8px;
+  }
+  .titleblock h1{ font-size:clamp(1.5rem,3vw,2.1rem); font-weight:800; }
+  .titleblock .sub{ color:var(--muted); margin-top:6px; font-size:.98rem; }
+
+  .stamp{
+    display:grid;
+    grid-template-columns:repeat(3, auto);
+    border:1px solid var(--border-strong);
+    border-radius:3px;
+    overflow:hidden;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;
+  }
+  .stamp div{
+    padding:7px 12px;
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+  .stamp div:nth-child(3n){ border-right:none; }
+  .stamp .k{ color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-size:.62rem; }
+  .stamp .v{ color:var(--ink); font-weight:600; margin-top:2px; }
+
+  /* ---- main body ---- */
+  .body{ padding:clamp(20px,4vw,40px); display:flex; flex-direction:column; gap:36px; }
+
+  .layout-main{ display:grid; grid-template-columns:1.55fr 1fr; gap:28px; align-items:start; }
+  @media (max-width:760px){ .layout-main{ grid-template-columns:1fr; } }
+
+  .panel{
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--surface-2);
+    padding:18px 18px 14px;
+  }
+  .panel h2{ font-size:.95rem; font-weight:700; margin-bottom:4px; }
+  .panel .panel-sub{ color:var(--muted); font-size:.8rem; margin-bottom:10px; }
+
+  svg text{ font-family:'IBM Plex Mono',monospace; fill:var(--ink); }
+  .ring-outline{ fill:none; stroke:var(--ink); stroke-width:3; }
+  .centerline{ stroke:var(--muted); stroke-width:1; stroke-dasharray:10 4 2 4; opacity:.6; }
+  .tick{ stroke:var(--accent); stroke-width:1.4; }
+  .dim-line{ stroke:var(--ink); stroke-width:1.4; }
+  .ext-line{ stroke:var(--muted); stroke-width:1; stroke-dasharray:3 3; }
+  .dim-label{ font-size:20px; font-weight:600; text-anchor:middle; }
+  .detail-marker{ fill:none; stroke:var(--accent); stroke-width:1.6; stroke-dasharray:5 4; }
+  .detail-letter-bg{ fill:var(--accent); }
+  .detail-letter{ fill:var(--surface); font-size:15px; font-weight:600; text-anchor:middle; dominant-baseline:central; }
+  .angle-arc{ fill:none; stroke:var(--accent); stroke-width:1.6; }
+  .radius-line{ stroke:var(--ink); stroke-width:1.4; }
+  .chord-line{ stroke:var(--accent); stroke-width:2.2; }
+  .small-label{ font-size:13px; fill:var(--muted); text-anchor:middle; }
+  .accent-label{ font-size:13px; fill:var(--accent); font-weight:600; text-anchor:middle; }
+
+  .note-line{ text-align:center; color:var(--muted); font-size:.78rem; margin-top:6px; }
+
+  /* sequence filmstrip */
+  .sequence{ display:flex; align-items:flex-end; justify-content:space-between; gap:6px; margin-top:6px; }
+  .seq-step{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:0; }
+  .seq-step svg{ width:100%; height:auto; }
+  .seq-step span{ font-size:.66rem; color:var(--muted); text-align:center; font-family:'IBM Plex Mono',monospace; }
+  .seq-arrow{ color:var(--border-strong); font-size:1.1rem; padding-bottom:18px; flex:0 0 auto; }
+
+  /* spec table */
+  table.spec{ width:100%; border-collapse:collapse; font-size:.92rem; }
+  table.spec caption{ text-align:left; font-family:'Kanit',sans-serif; font-weight:700; font-size:1rem; margin-bottom:12px; }
+  table.spec th{ text-align:left; color:var(--muted); font-weight:500; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; padding-bottom:8px; border-bottom:1px solid var(--border-strong); }
+  table.spec td{ padding:11px 10px 11px 0; border-bottom:1px solid var(--border); }
+  table.spec td.val{ text-align:right; padding-right:4px; font-weight:600; }
+  table.spec tr:last-child td{ border-bottom:none; }
+  table.spec tr.highlight td{ color:var(--accent); }
+  .wrap-x{ overflow-x:auto; }
+
+  .formula-row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .formula-chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.78rem;
+    background:var(--accent-soft);
+    color:var(--accent);
+    border-radius:4px;
+    padding:6px 10px;
+    white-space:nowrap;
+  }
+
+  .footnote{
+    border-top:1.5px solid var(--border-strong);
+    padding:20px clamp(20px,4vw,40px) 26px;
+    background:var(--surface-2);
+    color:var(--muted);
+    font-size:.88rem;
+  }
+  .footnote strong{ color:var(--ink); }
+</style>
+
+<div class="sheet">
+
+  <div class="titleblock">
+    <div class="heading">
+      <span class="eyebrow">ใบคำนวณงานพับเหล็ก · เครื่องย้ำ</span>
+      <h1>วงแหวนเมทัลชีท Ø3.000 ม.</h1>
+      <div class="sub">มุมงอ 6° ต่อการกดย้ำหนึ่งครั้ง — คำนวณจำนวนครั้ง ระยะห่าง และความยาวแผ่น</div>
+    </div>
+    <div class="stamp">
+      <div><span class="k">วัสดุ</span><div class="v">เมทัลชีท</div></div>
+      <div><span class="k">Ø ที่ต้องการ</span><div class="v">3.000 ม.</div></div>
+      <div><span class="k">มุม/ครั้ง</span><div class="v">6.000°</div></div>
+      <div><span class="k">จำนวนครั้ง</span><div class="v">60</div></div>
+      <div><span class="k">ระยะห่างจุด</span><div class="v">15.70 ซม.</div></div>
+      <div><span class="k">แผ่นที่ใช้</span><div class="v">≈ 9.42 ม.</div></div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="layout-main">
+      <div class="panel">
+        <h2>ผังจุดย้ำรอบวง</h2>
+        <div class="panel-sub">แสดงจุดย้ำครบทั้ง 60 จุด ห่างกันจุดละ 6° — วงกลมปิดสนิทเมื่อครบรอบ 360°</div>
+        <svg viewBox="0 0 640 660" role="img" aria-label="แผนผังวงกลมแสดงจุดย้ำ 60 จุดรอบเส้นผ่านศูนย์กลาง 3 เมตร">
+          <line class="centerline" x1="320" y1="70" x2="320" y2="570"/>
+          <line class="centerline" x1="70" y1="320" x2="570" y2="320"/>
+          <circle class="ring-outline" cx="320" cy="320" r="230"/>
+          <g id="ticks"></g>
+
+          <!-- detail marker at top, spanning first punch interval -->
+          <circle class="detail-marker" cx="332" cy="92" r="34"/>
+          <circle class="detail-letter-bg" cx="332" cy="52" r="12"/>
+          <text class="detail-letter" x="332" y="53">A</text>
+
+          <!-- diameter dimension -->
+          <line class="ext-line" x1="90" y1="320" x2="90" y2="592"/>
+          <line class="ext-line" x1="550" y1="320" x2="550" y2="592"/>
+          <line class="dim-line" x1="90" y1="582" x2="550" y2="582" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+          <text class="dim-label" x="320" y="614">⌀ 3.000 ม.</text>
+
+          <defs>
+            <marker id="arrowEnd" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="var(--ink)"/>
+            </marker>
+            <marker id="arrowStart" markerWidth="10" markerHeight="10" refX="2" refY="4" orient="auto">
+              <path d="M8,0 L0,4 L8,8 Z" fill="var(--ink)"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="note-line">เส้นรอบวง C = π·D ≈ 9.425 ม. · จุดย้ำห่างกันเท่า ๆ กันตลอดแนว</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <div class="panel">
+          <h2>DETAIL A — มุมย้ำหนึ่งจุด</h2>
+          <div class="panel-sub">ขยาย (ไม่ตามมาตราส่วน)</div>
+          <svg viewBox="0 0 300 250" role="img" aria-label="ภาพขยายมุม 6 องศาระหว่างจุดย้ำสองจุดและระยะคอร์ด">
+            <line class="radius-line" x1="150" y1="230" x2="141.1" y2="60.2"/>
+            <line class="radius-line" x1="150" y1="230" x2="158.9" y2="60.2"/>
+            <path class="angle-arc" d="M 145.5 145.1 A 85 85 0 0 1 154.5 145.1"/>
+            <text class="accent-label" x="150" y="130">6°</text>
+            <line class="chord-line" x1="141.1" y1="60.2" x2="158.9" y2="60.2"/>
+            <line class="ext-line" x1="141.1" y1="60.2" x2="141.1" y2="38"/>
+            <line class="ext-line" x1="158.9" y1="60.2" x2="158.9" y2="38"/>
+            <line class="dim-line" x1="141.1" y1="44" x2="158.9" y2="44" marker-start="url(#arrowStart)" marker-end="url(#arrowEnd)"/>
+            <text class="small-label" x="150" y="28">15.70 ซม.</text>
+            <text class="small-label" x="150" y="246">จุดศูนย์กลางวงกลม</text>
+          </svg>
+        </div>
+
+        <div class="panel">
+          <h2>ลำดับการย้ำ</h2>
+          <div class="panel-sub">ย้ำต่อเนื่องรอบเดียวจนครบวง</div>
+          <div class="sequence">
+            <div class="seq-step">
+              <svg viewBox="0 0 80 46"><path d="M6,38 Q40,36 74,38" fill="none" stroke="var(--ink)" stroke-width="3"/></svg>
+              <span>จุดที่ 1</span>
+            </div>
+            <div class="seq-arrow">→</div>
+            <div class="seq-step">
+              <svg viewBox="0 0 80 46"><path d="M6,40 Q40,4 74,40" fill="none" stroke="var(--ink)" stroke-width="3"/></svg>
+              <span>~15</span>
+            </div>
+            <div class="seq-arrow">→</div>
+            <div class="seq-step">
+              <svg viewBox="0 0 80 46"><path d="M8,32 Q40,-18 72,32" fill="none" stroke="var(--ink)" stroke-width="3"/></svg>
+              <span>~30</span>
+            </div>
+            <div class="seq-arrow">→</div>
+            <div class="seq-step">
+              <svg viewBox="0 0 80 46"><circle cx="40" cy="26" r="19" fill="none" stroke="var(--ink)" stroke-width="3" stroke-dasharray="46 8"/></svg>
+              <span>~45</span>
+            </div>
+            <div class="seq-arrow">→</div>
+            <div class="seq-step">
+              <svg viewBox="0 0 80 46"><circle cx="40" cy="26" r="19" fill="none" stroke="var(--accent)" stroke-width="3"/></svg>
+              <span>60 · ปิดวง</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap-x">
+      <table class="spec">
+        <caption>ตารางคำนวณ</caption>
+        <thead>
+          <tr><th>รายการ</th><th style="text-align:right">ค่า</th></tr>
+        </thead>
+        <tbody class="mono">
+          <tr><td>เส้นผ่านศูนย์กลาง (D)</td><td class="val">3.000 ม.</td></tr>
+          <tr><td>รัศมี (r = D/2)</td><td class="val">1.500 ม.</td></tr>
+          <tr><td>เส้นรอบวง (C = π·D)</td><td class="val">9.4248 ม.</td></tr>
+          <tr><td>มุมงอต่อการย้ำ 1 ครั้ง (θ)</td><td class="val">6.000°</td></tr>
+          <tr><td>จำนวนครั้งที่ต้องย้ำ (360° ÷ θ)</td><td class="val">60 ครั้ง</td></tr>
+          <tr><td>ระยะห่างจุดย้ำ (คอร์ด = 2r·sin(θ/2))</td><td class="val">15.70 ซม.</td></tr>
+          <tr><td>ความยาวแผ่นขั้นต่ำ (60 × คอร์ด)</td><td class="val">9.420 ม.</td></tr>
+          <tr class="highlight"><td>ความยาวแผ่นแนะนำให้ตัด (เผื่อจับยึด/ทาบรอยต่อ)</td><td class="val">9.45 – 9.50 ม.</td></tr>
+        </tbody>
+      </table>
+      <div class="formula-row">
+        <span class="formula-chip">C = π · D</span>
+        <span class="formula-chip">n = 360° ÷ θ</span>
+        <span class="formula-chip">คอร์ด = 2r · sin(θ/2)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footnote">
+    <strong>ข้อควรระวังหน้างาน:</strong> วัดและทำเครื่องหมายจุดย้ำทั้ง 60 จุดด้วยตลับเมตรก่อนเริ่มกดจริง เพื่อไม่ให้ระยะสะสมคลาดเคลื่อนจนวงเบี้ยว
+    หากหัวเครื่องย้ำมีความกว้างมากกว่า 15.7 ซม. ให้แจ้งขนาดหัวเครื่องเพื่อคำนวณจำนวนจุด/ระยะใหม่ให้พอดีกับหน้างานจริง
+  </div>
+</div>
+
+<script>
+(function(){
+  var ns = 'http://www.w3.org/2000/svg';
+  var g = document.getElementById('ticks');
+  var cx = 320, cy = 320, r = 230, tickLen = 13;
+  var n = 60;
+  for (var i = 0; i < n; i++) {
+    var a = (i * 6) * Math.PI / 180;
+    var sin = Math.sin(a), cos = Math.cos(a);
+    var x1 = cx + r * sin, y1 = cy - r * cos;
+    var x2 = cx + (r + tickLen) * sin, y2 = cy - (r + tickLen) * cos;
+    var line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', x1.toFixed(2));
+    line.setAttribute('y1', y1.toFixed(2));
+    line.setAttribute('x2', x2.toFixed(2));
+    line.setAttribute('y2', y2.toFixed(2));
+    line.setAttribute('class', 'tick');
+    g.appendChild(line);
+  }
+})();
+</script>
